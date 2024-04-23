@@ -1,0 +1,831 @@
+---
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+---
+metadata:
+  title: >-
+    Guardian Care Plan Report
+  short title: >-
+    Guardian Care Plan Report
+  description: |-
+    This interview helps someone in Massachusetts fill out and download your initial or annual Guardian Care Plan Report.
+  tags:
+    - "ES-00-00-00-00"
+    - "ES-03-00-00-00"
+    - "ES-05-00-00-00"
+    - "FA-00-00-00-00"
+  authors:
+  original_form:
+    - https://www.mass.gov/doc/guardians-care-planreport-mpc-821/download
+  allowed_courts: 
+    - "Probate and Family Court"
+  typical_role: "plaintiff"
+  al_weaver_version: "1.10.3"
+  generated_on: "2024-02-15"
+---
+code: |
+  # This controls the default country and list of states in address field questions
+  AL_DEFAULT_COUNTRY = "US"
+---
+code: |
+  # This controls the default state in address field questions
+  AL_DEFAULT_STATE = "MA"
+---
+code: |
+  github_repo_name =  'docassemble-GuardianCarePlanReport'
+---
+code: |
+  interview_short_title = "Fill out and download your initial or annual Guardian Care Plan Report"
+---
+code: |
+  al_form_type = "existing_case" 
+---
+objects:
+  - users: ALPeopleList.using(ask_number=True, target_number=1)
+---
+sections:
+  - review_Guardian_Care_Plan_Report: Review your answers
+---
+#################### Interview order #####################
+comment: |
+  Controls order and branching logic for questions specific to this form
+id: interview_order_Guardian_Care_Plan_Report
+code: |
+  # Set the allowed courts for this interview
+  allowed_courts = ['Probate and Family Court']
+  nav.set_section("review_Guardian_Care_Plan_Report")
+  user_role = "guardian"
+  user_ask_role = "plaintiff"
+  guardians1_name_full
+  #guardians[0].name_fields()
+  guardians[0].address.address
+  guardians[0].phone_number
+  guardians[0].email
+  #set_progress(42)
+  if guardians.there_is_another == True:
+    guardians[1].phone_number
+    guardians[1].address.address
+    guardians[1].email
+  #else:
+    #guardians[1].phone_number = ""
+    #guardians[1].address.address = ""
+    #guardians[1].email = ""
+  #set_progress(56)
+  #guardians.gather()
+  users.gather()
+  set_parts(subtitle=str(users))
+  users[0].birthdate
+  users1_address_on_one_line_1
+  trial_court_name
+  guardian_date
+  #person1_name_last
+  users1_relationship
+  check_Initial_plan
+  users1_address_on_one_line_1
+  set_progress(14)
+  level_care_VeryGood
+  users1_condition
+  guardians1_contact_caregivers
+  if guardians1_users1_funds == True:
+    conservator
+  users1_beginning_amount
+  set_progress(28)
+  users1_needs
+  docket_number
+  #trial_court.division
+  users[0].birthdate
+  #guardians.there_are_any == True
+  signature_date
+  #guardians[0].address.address
+  #guardians[0].phone_number
+  #guardians[0].email
+  #set_progress(42)
+  #if guardians.there_is_another == True:
+    #guardians[1].phone_number
+    #guardians[1].address.address
+    #guardians[1].email
+  #else:
+    #guardians[1].phone_number = ""
+    #guardians[1].address.address = ""
+    #guardians[1].email = ""
+  #set_progress(56)
+  #guardians.gather()
+
+  interview_order_Guardian_Care_Plan_Report = True
+---
+###################### Main order ######################
+comment: |
+  This block includes the logic for standalone interviews.
+  Delete mandatory: True to include in another interview
+mandatory: True
+code: |
+  al_intro_screen
+  Guardian_Care_Plan_Report_intro
+  interview_order_Guardian_Care_Plan_Report
+  signature_date
+  # Store anonymous data for analytics / statistics
+  store_variables_snapshot(
+      persistent=True,
+      data={
+          "zip": showifdef("users[0].address.zip"),
+          "reached_interview_end": True,
+      },
+  )
+  Guardian_Care_Plan_Report_download
+---
+comment: |
+  This question is used to introduce your interview. Please customize
+id: Guardian_Care_Plan_Report
+continue button field: Guardian_Care_Plan_Report_intro
+question: |
+  Guardian Care Plan Report
+subquestion: |
+  This interview will help you fill out and download your initial or annual Guardian Care Plan Report.
+  
+  Before you get started, please gather:
+    
+  1. Address(es) of Incapacitated Person 
+  2.  Services (medical, educational, vocational, etc.) of Incapacitated Person
+  3. If applicable, court related documents of abuse or neglect of Incapacitated Person
+  4. Financial Information for Incapacitated Person: (1) bank account balances, (2) sources and amounts of money received, (3) fees paid to caregiver(s) and guardian(s), and (4) misc. expenses (housing, insurance, maintenance)).
+    
+  When you are finished, you will need to:
+    
+  1. Download completed form
+  2. By hand, or mail, provide a copy of the completed form to the Incapacitated Person. Once done, fill out the last page of the completed form titled "Certification of Service" with the date you/attorney provided the form, your/attorney contact information, and sign.
+  3. Bring completed hard copy form to same Family and Probate Court that granted guardianship and hand to court clerk.
+   
+  IF this is your initial care plan: bring to court within 60 days of the date you were granted guardianship (locate date on court order/decree documents).
+  
+  IF this is your annual report: bring to court before the anniversary of the date you were granted guardianship (locate date on court order/decree documents).
+  
+  Most people take about 60 minutes to finish this interview.
+---
+id: Are You A Guardian
+sets:
+  - guardians[0].name.first
+  - guardians[0].name.last
+  - guardians[0].name.middle
+  #- guardians[1].name.first
+  #- guardians[1].name.middle
+  #- guardians[1].name.last
+question: |
+  Are you a guardian?
+subquestion: |
+  This interview is intended to be used by a guardian for the purpose of filling out the annual care plan report. If you are the guardian, please provide your name below. If there is a co-guardian, please provide their information on the following screens.
+fields:
+  #- "Guardian Full Name": guardians1_name_full
+  - code: |
+      guardians[0].name_fields()
+  - "What is your relationship to the Incapacitated Person? (i.e., mother, father, aunt, etc.)": users1_relationship
+    maxlength: 22
+  #- "Is there a co-guardian?": coguardian_yes_no
+    #datatype: yesnoradio
+  #- "What is the Co-Guardian's Name?": guardians2_name_full
+    #show if: coguardian_yes_no
+  #- code: |
+      #guardians[1].name_fields()
+---
+id: set guardian name
+code: |
+  guardians1_name_full = guardians[0].name.full()
+---
+id: Incapacitated Person
+question: |
+  Who do you have a guardianship for?
+subquestion: |
+  Throughout the court form, the term "Incapacitated Person" is referring to the individual you are a guardian for. Please provide the name of the individual you are a guardian for.
+fields:
+  - "First Name": users[0].name.first
+  - "Middle Name": users[0].name.middle
+  - "Last Name": users[0].name.last
+---
+id: Incapacitated Person Birthdate Question
+question: |
+  When was ${users[0].name.full()} born?
+fields:
+  - Birthdate: users[0].birthdate
+    datatype: BirthDate
+---
+id: Case Court Information
+question: |
+  Case & Court Information
+subquestion: |
+  Please provide the information of the Family and Probate Court that handled and granted your guardianship case. This information can be found on the "Decree and Order of Appointment Of Guardian For An Incapacitated Person" court document.
+fields:
+  #- "What is the trial court name that granted your guardianship?": trial_court_name
+    #input type: dropdown
+    #choices:
+      #- Probate and Family Court
+ #I added in the next question about division to see if it would fix the error
+  - "What is the trial court division that granted your guardianship?": trial_court_address.county   
+    maxlength: 22
+  - "What is the address of the Probate and Family Court that granted your guardianship?": trial_court_address_address
+  - "Date Guardianship Granted": guardian_date
+    datatype: date
+---
+id: Purpose of Filling Out Current Form
+question: |
+  Purpose of Filling Out Current Form
+subquestion: |
+  Please indicate whether this form is the first 60 day care plan you are submitting to the court, or whether it is the annual report that you file each year. Include applicable date range for this plan/report. 
+  
+  i.e., for an annual report, if guardianship was granted on 1/1/2020, the date range for an annual report may be 1/2/2022 (day after annual grant date) - 12/31/2022 (day before annual grant date)
+fields:
+  - "Initial 60-Day Care Plan": check_Initial_plan
+    datatype: yesno
+  - "Annual Report": check_annual_report
+    datatype: yesno
+  - "Start Date of Current Plan/Report": reporting_start_date
+    datatype: date
+  - "End Date of Current Plan/Report": reporting_end_date
+    datatype: date
+  - "Are you requesting the court to modify the guardianship?": modify_guardianship_request
+    datatype: yesnoradio
+  - note: If you, as the guardian, are requesting to modify the guardianship in addition to filing this Guardian Care Plan/Report, please note that you are required to fill out a separate form to Petition the Court.
+    show if: modify_guardianship_request
+  - "Are you requesting the court to terminate the guardianship?": terminate_guardianship_request
+    datatype: yesnoradio
+  - note: If you, as the guardian, are requesting to terminate the guardianship in addition to filing this Guardian Care Plan/Report, please note that you are required to fill out a separate form to Petition the Court.
+    show if: terminate_guardianship_request
+---
+id: Incapacitated Person Contact Information
+question: |
+   ${users[0].name.full()} Contact Information
+subquestion: |
+  Please provide the address(es) of ${users[0].name.full()} during this reporting period (date range indicated previously).
+    
+  If ${users[0].name.full()} has only had one residence in this reporting period, you do not need to answer the questions about secondary and third addresses. 
+    
+  If ${users[0].name.full()} has had more than 3 addresses during this reporting period, please answer that question accordingly.
+fields:
+  - "Current Address of ${users[0].name.full()}": users1_address_on_one_line_1
+    #maxlength: 34
+  - "Date Range ${users[0].name.full()} Lived at Current Address": users1_residence_date_1
+    maxlength: 26
+  - "Does ${users[0].name.full()} Currently Live at a Facility?": yes_facility
+    datatype: yesnoradio
+  - "If ${users[0].name.full()} current address is a facility, what is the name and type of facility?": users1_residence_facility_1
+    maxlength: 34
+    show if: yes_facility
+    
+  - "Has ${users[0].name.full()} lived anywhere else during this reporting period?": has_additional_address
+    datatype: yesnoradio
+  - "Secondary Address: If ${users[0].name.full()} lived at a different address this year, what is the address?": users1_address_on_one_line_2
+    maxlength: 34
+    show if: has_additional_address
+  - "Secondary Address: If ${users[0].name.full()} lived at a different address this year then their current address, what are the dates they lived there?": users1_residence_date_2
+    maxlength: 26
+    show if: has_additional_address
+  - "Secondary Address: If ${users[0].name.full()} lived at a different address this year and it was a facility, what is the name and type of facility?": users1_residence_facility_2
+    maxlength: 34
+    show if: has_additional_address
+    required: false
+    
+  - "Has ${users[0].name.full()} lived anywhere else during this reporting period?": has_additional_address_q2
+    datatype: yesnoradio
+    show if: has_additional_address
+  - "Third Address: If ${users[0].name.full()} lived at a different address this year, what is the address?": users1_address_on_one_line_3
+    maxlength: 34
+    show if: has_additional_address_q2
+  - "Third Address: Secondary Address: If ${users[0].name.full()} lived at a difference address this year then their current address, what are the dates they lived there?": users1_residence_date_3
+    maxlength: 26
+    show if: has_additional_address_q2
+  - "Third Address: If ${users[0].name.full()} lived at a difference address this year and it was a facility, what is the name and type of facility?": users1_residence_facility_3
+    maxlength: 34
+    show if: has_additional_address_q2
+    required: false
+---
+id: Incapacitated Persons Level of Care
+question: |
+  ${users[0].name.full()}'s Level of Care
+subquestion: |
+  For level of care, please check off the option that best describes the adequacy of care and services ${users[0].name.full()} receives. Then, explain.
+fields:
+  - "Very Good": level_care_VeryGood
+    datatype: yesno
+  - "Good": level_care_good
+    datatype: yesno
+  - "Adequate": level_care_adequate
+    datatype: yesno
+  - "Poor": level_care_poor
+    datatype: yesno
+  - "Do you consider the current living arrangements and level of care and treatment to be in the best interests of ${users[0].name.full()}? Explain why or why not.": users1_care
+    input type: area
+---
+id: Incapacitated Person s Condition Medications and Services
+question: |
+  ${users[0].name.full()}'s Condition, Medications, and Services
+fields:
+  - "Describe ${users[0].name.full()}'s current mental, physical, and social conditions.": users1_condition
+    input type: area
+  - "Describe the medical, educational, vocational and other services provided to ${users[0].name.full()} during this reporting period": users1_services
+    input type: area
+  - "Is ${users[0].name.full()} taking and/or receiving antipsychotic medication(s)?": users1_antipsychotics
+    datatype: yesnoradio
+  - note: If they are prescribed antipsychotic medication(s), please note that you are obligated to notify the court and implement a rogers guardianship.
+    show if: users1_antipsychotics
+  - "Have any criminal charges or reports of abuse or neglect involving ${users[0].name.full()} been filed with a court or agency since the last report?": users1_reported_abuse
+    datatype: yesnoradio
+  - "If yes to criminal charges or reports, explain": users1_abuse
+    input type: area
+    show if: users1_reported_abuse
+  - "Describe the extent to which ${users[0].name.full()} did/did not participate in decision-making about personal and health care decisions.": users1_decisions
+    input type: area
+---
+id: Your Involvement as Guardian
+question: |
+  Your Involvement as Guardian
+fields:
+  - "Describe the nature and frequency of your visits with ${users[0].name.full()}, your contact with caregivers and health care providers, and any other activities you undertook on ${users[0].name.full()}'s behalf during this reporting period.": guardians1_contact_caregivers
+    input type: area
+  - "Are you a Representative Payee?": guardians1_rep_payee
+    datatype: yesnoradio
+  - "Do you hold or receive funds belonging to ${users[0].name.full()} in your role as Guardian other than as a Representative Payee?": guardians1_users1_funds
+    datatype: yesnoradio
+---
+id: Conservator
+question: |
+  Conservator
+fields:
+  - "Is there a Conservator appointed?": conservator
+    datatype: yesnoradio
+---
+id: Financial Information
+question: |
+  Financial Information
+subquestion: |
+  These questions provide the court with a summary of ${users[0].name.full()}'s financial activity during this reporting period--not your individual finances.
+  
+  You should only be answering these questions if you previously indicated you hold or receive funds for ${users[0].name.full()} in your role as a Guardian (other than as a representative payee), and additionally, that ${users[0].name.full()} does not have a Conservator.
+fields:
+  - "Beginning balance of ${users[0].name.full()}'s bank accounts at the start of reporting period (savings, checking, CDs, money market, etc.)": users1_beginning_amount
+    datatype: currency
+    min: 0
+  - "Money you received from any source on behalf of ${users[0].name.full()} (Social Security, SSI, pension, disability, interest, etc.)": users1_money_received_amount
+    datatype: currency
+    min: 0
+  - "Total fees paid to care providers": users1_fees_caregiver_amount
+    datatype: currency
+    min: 0
+  - "Total monies paid to ${users[0].name.full()} (personal needs, etc.)": users1_paid_personal_amount
+    datatype: currency
+    min: 0
+  - "Total fees paid to you as guardian": users1_fees_guardian_amount
+    datatype: currency
+    min: 0
+  - "Amount of any other expenses (housing, insurance, maintenance, etc.)": users1_expenses_amount
+    datatype: currency
+    min: 0
+  - "What is the ending balance of the bank accounts, after adding and subtracting the above finances for this reporting period?": users1_ending_amount
+    datatype: currency
+    min: 0
+---
+id: Guardianship Moving Forward
+question: |
+  Guardianship Moving Forward
+fields:
+  - "Describe the needs of ${users[0].name.full()} for a continued guardianship. Include any recommended changes and/or limitations to the guardianship.": users1_needs
+    input type: area
+  - "Describe what residence, services and levels of personal/health care you expect might change for ${users[0].name.full()} during the next 18 months, if any.": users1_changes
+    input type: area
+  - "Do you have any comments or concerns about ${users[0].name.full()} or the current guardianship?": guardians1_comment
+    input type: area
+---
+id: preview Guardian_Care_Plan_Report
+question: |
+  Preview your form before you sign it
+subquestion: |
+  Here is a preview of the form you will sign on the next page.   
+  
+  ${ al_court_bundle.as_pdf(key='preview') }
+
+  Click the image to open it in a new tab. Click the "Edit answers" button
+  to edit your answers.
+
+  ${ action_button_html(url_action('review_Guardian_Care_Plan_Report'), label='Edit answers', color='info') }
+  
+  Remember to come back to this window to continue and sign your form.
+continue button field: Guardian_Care_Plan_Report_preview_question    
+---
+code: |
+  signature_fields = ['guardians[1].signature', 'guardians[0].signature']
+---
+code: |
+  # This is a placeholder for the addresses that will be searched
+  # for matching address to court. Edit if court venue is based on 
+  # a different address than the user's
+  [user.address.address for user in users.complete_elements()]
+  addresses_to_search = [user.address for user in users.complete_elements()]
+---
+id: Guardian Care Plan Report review screen
+event: review_Guardian_Care_Plan_Report
+question: |
+  Review your answers
+review:
+  - Edit: docket_number
+    button: |
+      **Docket number**:
+      ${ docket_number }
+  - Edit: trial_court
+    button: |
+      **Trial court**
+  
+      % if defined("trial_court.division"):
+      * division: ${ trial_court.division }
+      % endif
+  - Edit: users.revisit
+    button: |
+      **Users**
+
+      % for item in users:
+        * ${ item }
+      % endfor
+  - Edit: users[0].name.last
+    button: |
+      **Your Last Name**:
+      ${ users[0].name.last }
+  - Edit: users1_relationship
+    button: |
+      **Relationship to Incapacitated Person (i.e., mother, father, aunt, etc.)**:
+      ${ users1_relationship }
+  - Edit: guardian_date
+    button: |
+      **Date Guardianship Granted**:
+      ${ guardian_date }
+  - Edit: check_Initial_plan
+    button: |
+      **Initial 60-Day Care Plan**:
+      ${ check_Initial_plan }
+  - Edit: check_annual_report
+    button: |
+      **Annual Report**:
+      ${ check_annual_report }
+  - Edit: reporting_start_date
+    button: |
+      **Start Date of Current Plan/Report**:
+      ${ reporting_start_date }
+  - Edit: reporting_end_date
+    button: |
+      **End Date of Current Plan/Report**:
+      ${ reporting_end_date }
+  - Edit: users1_condition
+    button: |
+      **Describe the Incapacitated Person's current mental, physical, and social conditions.**:
+      > ${ single_paragraph(users1_condition) }
+  - Edit: users1_residence_date_1
+    button: |
+      **Date Range Incapacitated Person Lived at Current Address**:
+      ${ users1_residence_date_1 }
+  - Edit: users1_address_on_one_line_1
+    button: |
+      **Current Address of Incapacitated Person**:
+      ${ users1_address_on_one_line_1 }
+  - Edit: users1_residence_facility_1
+    button: |
+      **If Incapacitated Person's current address is a facility, what is the name and type of facility?**:
+      ${ users1_residence_facility_1 }
+  - Edit: users1_residence_date_2
+    button: |
+      **If Applicable, Secondary Address: If Incapacitated Person lived at a difference address this year then their current address, what are the dates they lived there?**:
+      ${ users1_residence_date_2 }
+  - Edit: users1_address_on_one_line_2
+    button: |
+      **If Applicable, Secondary Address: If Incapacitated Person lived at a difference address this year, what is the address?**:
+      ${ users1_address_on_one_line_2 }
+  - Edit: users1_residence_facility_2
+    button: |
+      **If Applicable, Secondary Address: If Incapacitated Person lived at a difference address this year and it was a facility, what is the name and type of facility?**:
+      ${ users1_residence_facility_2 }
+  - Edit: users1_residence_date_3
+    button: |
+      **If Applicable, Third Address: Secondary Address: If Incapacitated Person lived at a difference address this year then their current address, what are the dates they lived there?**:
+      ${ users1_residence_date_3 }
+  - Edit: users1_address_on_one_line_3
+    button: |
+      **If Incapacitated Person lived at a difference address this year, what is the address?**:
+      ${ users1_address_on_one_line_3 }
+  - Edit: users1_residence_facility_3
+    button: |
+      **If Applicable, Third Address: If Incapacitated Person lived at a difference address this year and it was a facility, what is the name and type of facility?**:
+      ${ users1_residence_facility_3 }
+  - Edit: level_care_VeryGood
+    button: |
+      **Very Good**:
+      ${ level_care_VeryGood }
+  - Edit: level_care_good
+    button: |
+      **Good**:
+      ${ level_care_good }
+  - Edit: level_care_adequate
+    button: |
+      **Adequate**:
+      ${ level_care_adequate }
+  - Edit: level_care_poor
+    button: |
+      **Poor**:
+      ${ level_care_poor }
+  - Edit: users1_care
+    button: |
+      **Do you consider the current living arrangements and level of care and treatment to be in the best interests of the Incapacitated Person? Explain why or why not.**:
+      > ${ single_paragraph(users1_care) }
+  - Edit: users1_services
+    button: |
+      **Describe the medical, educational, vocational and other services provided to the Incapacitated Person during this reporting period**:
+      > ${ single_paragraph(users1_services) }
+  - Edit: users1_antipsychotics
+    button: |
+      **Is the Incapacitated Person taking and/or receiving antipsychotic medication(s)?**:
+      ${ users1_antipsychotics }
+  - Edit: users1_reported_abuse
+    button: |
+      **Have any criminal charges or reports of abuse or neglect involving the Incapacitated Person been filed with a court or agency since the last report?**:
+      ${ users1_reported_abuse }
+  - Edit: users1_abuse
+    button: |
+      **If yes to criminal charges or reports, explain**:
+      > ${ single_paragraph(users1_abuse) }
+  - Edit: guardians1_contact_caregivers
+    button: |
+      **Describe the nature and frequency of your visits with the Incapacitated Person, your contact with caregivers and health care providers, and any other activities you undertook on the Incapacitated Person's behalf during this reporting period.**:
+      > ${ single_paragraph(guardians1_contact_caregivers) }
+  - Edit: users1_decisions
+    button: |
+      **Describe the extent to which the Incapacitated Person did/did not participate in decision-making about personal and health care decisions.**:
+      > ${ single_paragraph(users1_decisions) }
+  - Edit: users1_needs
+    button: |
+      **Describe the needs of the Incapacitated Person for a continued guardianship. Include any recommended changes and/or limitations to the guardianship.**:
+      > ${ single_paragraph(users1_needs) }
+  - Edit: users1_changes
+    button: |
+      **Describe what residence, services and levels of personal/health care you expect might change for the Incapacitated Person during the next 18 months, if any.**:
+      > ${ single_paragraph(users1_changes) }
+  - Edit: guardians1_rep_payee
+    button: |
+      **Are you a Representative Payee?**:
+      ${ guardians1_rep_payee }
+  - Edit: guardians1_users1_funds
+    button: |
+      **Do you hold or receive funds belonging to the Incapacitated Person in your role as Guardian other than as a Representative Payee?**:
+      ${ guardians1_users1_funds }
+  - Edit: conservator
+    button: |
+      **Is there a Conservator appointed?**:
+      ${ word(yesno(conservator)) }
+  - Edit: users1_beginning_amount
+    button: |
+      **Beginning balance of Incapacitated Person's bank accounts at the start of reporting period (savings, checking, CDs, money market, etc.)**:
+      ${ currency(users1_beginning_amount) }
+  - Edit: users1_money_received_amount
+    button: |
+      **Money you received from any source on behalf of the Incapacitated Person (Social Security, SSI, pension, disability, interest, etc.)**:
+      ${ currency(users1_money_received_amount) }
+  - Edit: users1_fees_caregiver_amount
+    button: |
+      **Total fees paid to care providers**:
+      ${ currency(users1_fees_caregiver_amount) }
+  - Edit: users1_paid_personal_amount
+    button: |
+      **Total monies paid to the Incapacitated Person (personal needs, etc.)**:
+      ${ currency(users1_paid_personal_amount) }
+  - Edit: users1_fees_guardian_amount
+    button: |
+      **Total fees paid to you as guardian**:
+      ${ currency(users1_fees_guardian_amount) }
+  - Edit: users1_expenses_amount
+    button: |
+      **Amount of any other expenses (housing, insurance, maintenance, etc.)**:
+      ${ currency(users1_expenses_amount) }
+  - Edit: users1_ending_amount
+    button: |
+      **What is the ending balance of the bank accounts, after adding and subtracting the above finances for this reporting period?**:
+      ${ currency(users1_ending_amount) }
+  - Edit: guardians1_comment
+    button: |
+      **Do you have any comments or concerns about the incapacitated person or the current guardianship?**:
+      > ${ single_paragraph(guardians1_comment) }
+  - Edit: signature_date
+    button: |
+      **Date of signature**:
+      ${ signature_date }
+  - Edit: guardians.revisit
+    button: |
+      **Guardians**
+
+      % for item in guardians:
+        * ${ item }
+      % endfor
+  - Edit: coguardian_yes_no
+    button: |
+      **Is there a co-guardian?**:
+      ${ coguardian_yes_no }
+  - Edit: modify_guardianship_request
+    button: |
+      **Are you requesting the court to modify the guardianship?**:
+      ${ modify_guardianship_request }
+  - Edit: terminate_guardianship_request
+    button: |
+      **Are you requesting the court to terminate the guardianship?**:
+      ${ terminate_guardianship_request }
+  - Edit: trial_court_address_address
+    button: |
+      **What is the address of the Probate and Family Court that granted your guardianship?**:
+      ${ trial_court_address_address }
+  - Edit: trial_court_name
+    button: |
+      **What is the trial court name that granted your guardianship?**:
+      ${ trial_court_name }
+---
+continue button field: users.revisit
+question: |
+  Edit users
+subquestion: |
+  ${ users.table }
+
+  ${ users.add_action() }
+---
+table: users.table
+rows: users
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+  - Birthdate: |
+      row_item.birthdate if defined("row_item.birthdate") else ""
+edit:
+  - name.first
+  - birthdate
+confirm: True
+
+---
+continue button field: guardians.revisit
+question: |
+  Edit guardians
+subquestion: |
+  ${ guardians.table }
+
+  ${ guardians.add_action() }
+---
+table: guardians.table
+rows: guardians
+columns:
+  - Signature: |
+      row_item.signature if defined("row_item.signature") else ""
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+  - Address: |
+      row_item.address.block() if defined("row_item.address.zip") else ""
+  - Phone number: |
+      row_item.phone_number if defined("row_item.phone_number") else ""
+  - Email: |
+      row_item.email if defined("row_item.email") else ""
+edit:
+  - signature
+  - name.first
+  - address.zip
+  - phone_number
+  - email
+confirm: True
+
+---
+id: download Guardian_Care_Plan_Report
+event: Guardian_Care_Plan_Report_download
+question: |
+  All done
+subquestion: |
+  Thank you ${users}. Your form is ready to download and deliver.
+  
+  View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
+
+  ${ action_button_html(url_action('review_Guardian_Care_Plan_Report'), label='Edit answers', color='info') }
+  
+  
+  ${ al_user_bundle.download_list_html() }
+  
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+
+progress: 100
+---
+# ALDocument objects specify the metadata for each template
+objects:
+  - Guardian_Care_Plan_Report_Post_interview_instructions: ALDocument.using(title="Instructions", filename="Guardian_Care_Plan_Report_next_steps.docx", enabled=True, has_addendum=False)
+  - Guardian_Care_Plan_Report_attachment: ALDocument.using(title="Guardian Care Plan Report", filename="Guardian_Care_Plan_Report", enabled=True, has_addendum=True, default_overflow_message=AL_DEFAULT_OVERFLOW_MESSAGE)
+---
+# Bundles group the ALDocuments into separate downloads, such as for court and for the user
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[Guardian_Care_Plan_Report_Post_interview_instructions, Guardian_Care_Plan_Report_attachment], filename="Guardian_Care_Plan_Report", title="All forms to download for your records", enabled=True)
+  - al_court_bundle: ALDocumentBundle.using(elements=[Guardian_Care_Plan_Report_attachment],  filename="Guardian_Care_Plan_Report", title="All forms to deliver to court", enabled=True)
+---
+# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
+# used for "preview" and "final" keys, and logic in the template checks the value of 
+# `i` to show or hide the user's signature
+attachment:
+  name: Post-interview-Instructions
+  filename: Guardian_Care_Plan_Report_next_steps
+  docx template file: Guardian_Care_Plan_Report_next_steps.docx
+  variable name: Guardian_Care_Plan_Report_Post_interview_instructions[i]
+  skip undefined: True
+  tagged pdf: True
+---
+attachment:
+  name: Guardian Care Plan Report
+  filename: Guardian_Care_Plan_Report
+  variable name: Guardian_Care_Plan_Report_attachment[i]
+  skip undefined: True
+  pdf template file: Guardian_Care_Plan_Report.pdf
+  fields:
+      - "docket_number": ${ docket_number }
+      - "trial_court_division": ${ trial_court_address.county }
+      - "users1_name_middle": ${ users[0].name.middle }
+      - "person1_name_last": ${ users[0].name.last }
+      - "users1_name_first": ${ users[0].name.first }
+      - "users1_age": ${ users[0].age_in_years() }
+      - "users1_relationship": ${ users1_relationship }
+      - "guardian_date": ${ guardian_date.format() }
+      - "check_Initial_plan": ${ check_Initial_plan }
+      - "check_annual_report": ${ check_annual_report }
+      - "reporting_start_date": ${ reporting_start_date.format() }
+      - "reporting_end_date": ${ reporting_end_date.format() }
+      - "users1_condition": ${ Guardian_Care_Plan_Report_attachment.safe_value("users1_condition") }
+      - "users1_residence_date_1": ${ users1_residence_date_1 }
+      - "users1_address_on_one_line_1": ${ users1_address_on_one_line_1 }
+      - "users1_residence_facility_1": ${ users1_residence_facility_1 }
+      - "users1_residence_date_2": ${ users1_residence_date_2 }
+      - "users1_address_on_one_line_2": ${ users1_address_on_one_line_2 }
+      - "users1_residence_facility_2": ${ users1_residence_facility_2 }
+      - "users1_residence_date_3": ${ users1_residence_date_3 }
+      - "users1_address_on_one_line_3": ${ users1_address_on_one_line_3 }
+      - "users1_residence_facility_3": ${ users1_residence_facility_3 }
+      - "level_care_VeryGood": ${ level_care_VeryGood }
+      - "level_care_good": ${ level_care_good }
+      - "level_care_adequate": ${ level_care_adequate }
+      - "level_care_poor": ${ level_care_poor }
+      - "users1_care": ${ Guardian_Care_Plan_Report_attachment.safe_value("users1_care") }
+      - "users1_services": ${ Guardian_Care_Plan_Report_attachment.safe_value("users1_services") }
+      - "users1_antipsychotics_yes": ${ users1_antipsychotics }
+      - "users1_antipsychotics_no": ${ not users1_antipsychotics }
+      - "users1_reported_abuse_yes": ${ users1_reported_abuse }
+      - "users1_reported_abuse_no": ${ not users1_reported_abuse }
+      - "users1_abuse": ${ Guardian_Care_Plan_Report_attachment.safe_value("users1_abuse") }
+      - "guardians1_contact_caregivers": ${ Guardian_Care_Plan_Report_attachment.safe_value("guardians1_contact_caregivers") }
+      - "users1_decisions": ${ Guardian_Care_Plan_Report_attachment.safe_value("users1_decisions") }
+      - "users1_needs": ${ Guardian_Care_Plan_Report_attachment.safe_value("users1_needs") }
+      - "users1_changes": ${ Guardian_Care_Plan_Report_attachment.safe_value("users1_changes") }
+      - "guardians1_rep_payee_yes": ${ guardians1_rep_payee }
+      - "guardians1_rep_payee_no": ${ not guardians1_rep_payee }
+      - "guardians1_users1_funds_yes": ${ guardians1_users1_funds }
+      - "guardians1_users1_funds_no": ${ not guardians1_users1_funds }
+      - "conservator_yes": ${ conservator }
+      - "conservator_no": ${ not conservator }
+      - "users1_beginning_amount": ${ currency(users1_beginning_amount) }
+      - "users1_money_received_amount": ${ currency(users1_money_received_amount) }
+      - "users1_fees_caregiver_amount": ${ currency(users1_fees_caregiver_amount) }
+      - "users1_paid_personal_amount": ${ currency(users1_paid_personal_amount) }
+      - "users1_fees_guardian_amount": ${ currency(users1_fees_guardian_amount) }
+      - "users1_expenses_amount": ${ currency(users1_expenses_amount) }
+      - "users1_ending_amount": ${ currency(users1_ending_amount) }
+      - "guardians1_comment": ${ Guardian_Care_Plan_Report_attachment.safe_value("guardians1_comment") }
+      - "signature_date": ${ signature_date }
+      - "guardians2_signature": ${ guardians[1].signature_if_final(i) }
+      - "guardians1_signature": ${ guardians[0].signature_if_final(i) }
+      - "guardians1_name_full": ${ guardians[0] }
+      - "guardians2_name_full": ${ guardians[1] }
+      - "guardians1_address_unit": ${ guardians[0].address.unit }
+      - "guardians2_address_unit": ${ guardians[1].address.unit }
+      - "guardians1_address_address": ${ guardians[0].address.address }
+      - "guardians2_address_address": ${ guardians[1].address.address }
+      - "guardians1_address_city": ${ guardians[0].address.city }
+      - "guardians1_address_state": ${ guardians[0].address.state }
+      - "guardians1_address_zip": ${ guardians[0].address.zip }
+      - "guardians2_address_city": ${ guardians[1].address.city }
+      - "guardians2_address_state": ${ guardians[1].address.state }
+      - "guardians2_address_zip": ${ guardians[1].address.zip }
+      - "guardians1_phone_number": ${ guardians[0].phone_number }
+      - "guardians2_phone_number": ${ guardians[1].phone_number }
+      - "guardians1_email": ${ guardians[0].email }
+      - "guardians2_email": ${ guardians[1].email }
+---
+code: |
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_condition"].overflow_trigger = 273
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_condition"].label = "Describe the Incapacitated Person's current mental, physical, and social conditions."
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_care"].overflow_trigger = 270
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_care"].label = "Do you consider the current living arrangements and level of care and treatment to be in the best interests of the Incapacitated Person? Explain why or why not."
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_services"].overflow_trigger = 270
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_services"].label = "Describe the medical, educational, vocational and other services provided to the Incapacitated Person during this reporting period"
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_abuse"].overflow_trigger = 270
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_abuse"].label = "If yes to criminal charges or reports, explain"
+  Guardian_Care_Plan_Report_attachment.overflow_fields["guardians1_contact_caregivers"].overflow_trigger = 270
+  Guardian_Care_Plan_Report_attachment.overflow_fields["guardians1_contact_caregivers"].label = "Describe the nature and frequency of your visits with the Incapacitated Person, your contact with caregivers and health care providers, and any other activities you undertook on the Incapacitated Person's behalf during this reporting period."
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_decisions"].overflow_trigger = 270
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_decisions"].label = "Describe the extent to which the Incapacitated Person did/did not participate in decision-making about personal and health care decisions."
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_needs"].overflow_trigger = 270
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_needs"].label = "Describe the needs of the Incapacitated Person for a continued guardianship. Include any recommended changes and/or limitations to the guardianship."
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_changes"].overflow_trigger = 270
+  Guardian_Care_Plan_Report_attachment.overflow_fields["users1_changes"].label = "Describe what residence, services and levels of personal/health care you expect might change for the Incapacitated Person during the next 18 months, if any."
+  Guardian_Care_Plan_Report_attachment.overflow_fields["guardians1_comment"].overflow_trigger = 270
+  Guardian_Care_Plan_Report_attachment.overflow_fields["guardians1_comment"].label = "Do you have any comments or concerns about the incapacitated person or the current guardianship?"
+  Guardian_Care_Plan_Report_attachment.overflow_fields.gathered = True
+
+
+
